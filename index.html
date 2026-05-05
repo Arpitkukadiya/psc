@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+  <title>PSC STEEL | Professional Tax Invoice Generator</title>
+  <!-- html2pdf library for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* RESET - FIX ALL UI BREAKING ISSUES */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #eef2f5;
+      padding: 20px;
+      font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Main App Container - Perfect Responsive Flex */
+    .invoice-app {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    /* LEFT FORM PANEL - Clean, Scrollable */
+    .form-editor {
+      flex: 1.2;
+      min-width: 300px;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+      height: fit-content;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* RIGHT PREVIEW PANEL */
+    .preview-area {
+      flex: 1.8;
+      min-width: 340px;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      gap: 12px;
+    }
+
+    .preview-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-download {
+      background: #0f3b2c;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-download:hover {
+      background: #b12704;
+      transform: translateY(-2px);
+    }
+
+    /* INVOICE CARD - Perfect Rendering */
+    .invoice-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+      padding: 28px 26px;
+      transition: all 0.2s;
+    }
+
+    .invoice-paper {
+      font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+      color: #1a1f2e;
+      line-height: 1.4;
+    }
+
+    /* HEADER WITH PSC LOGO */
+    .inv-logo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      border-bottom: 3px solid #b12704;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      gap: 12px;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .logo-circle {
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(145deg, #1e4620, #0f2e12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: 800;
+      font-family: 'Arial Black', sans-serif;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .company-title h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #b12704;
+      letter-spacing: 0.5px;
+    }
+    .company-title .tagline {
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      color: #2c5e2a;
+    }
+    .inv-badge {
+      background: #fef3e2;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #a33c1a;
+    }
+
+    .company-address-block {
+      text-align: center;
+      font-size: 11px;
+      background: #fef9ef;
+      padding: 8px 12px;
+      border-radius: 18px;
+      margin: 12px 0 14px 0;
+      font-weight: 500;
+      border: 1px solid #ffedd5;
+    }
+
+    .customer-section {
+      background: #f8fafc;
+      padding: 12px 14px;
+      border-radius: 18px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+
+    .info-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 12px 0;
+      background: #ffffff;
+      border-bottom: 1px dashed #d4d4d8;
+      padding-bottom: 12px;
+    }
+
+    .info-item {
+      font-size: 11.5px;
+      font-weight: 500;
+    }
+
+    .bill-ship-row {
+      margin: 12px 0;
+      font-size: 11px;
+      background: #fefce8;
+      padding: 12px;
+      border-radius: 20px;
+    }
+
+    /* PRODUCT TABLE - Responsive scroll */
+    .inv-table-wrapper {
+      overflow-x: auto;
+      margin: 18px 0;
+    }
+    .inv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      min-width: 600px;
+    }
+    .inv-table th, .inv-table td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 6px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .inv-table th {
+      background: #eef2ff;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .text-right {
+      text-align: right;
+    }
+
+    .totals-panel {
+      margin-top: 16px;
+      background: #f9fafb;
+      border-radius: 20px;
+      padding: 16px 18px;
+    }
+    .flex-totals {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .totals-right-block {
+      min-width: 250px;
+      text-align: right;
+    }
+    .totals-line-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 25px;
+      font-size: 12px;
+      padding: 4px 0;
+    }
+    .bank-terms-section {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 9px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 16px;
+    }
+    .signature-area {
+      margin-top: 20px;
+      text-align: right;
+      font-size: 11px;
+      font-weight: 600;
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 14px;
+    }
+
+    /* FORM STYLES - Perfect */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: block;
+      margin-bottom: 6px;
+      color: #1e4620;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #cfdfe9;
+      border-radius: 24px;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      background: #fff;
+    }
+    input:focus, textarea:focus {
+      border-color: #b12704;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(177,39,4,0.15);
+    }
+    .inline-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .inline-row .form-group {
+      flex: 1;
+      min-width: 120px;
+    }
+    h3 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: #1e3a2f;
+      border-left: 5px solid #b12704;
+      padding-left: 14px;
+    }
+    h4 {
+      font-size: 1.1rem;
+      margin: 16px 0 12px 0;
+      color: #1e4620;
+    }
+    hr {
+      margin: 18px 0;
+      border-color: #e9ecef;
+    }
+    button.refresh-btn {
+      background: #1f5e45;
+      color: white;
+      width: 100%;
+      padding: 12px;
+      border-radius: 40px;
+      font-weight: bold;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: 0.2s;
+    }
+    button.refresh-btn:hover {
+      background: #0f3b2c;
+    }
+    .btn-add-product {
+      background: #b12704;
+      margin-top: 0;
+      margin-bottom: 12px;
+      width: auto;
+      padding: 8px 18px;
+      font-size: 0.8rem;
+    }
+    .btn-add-product:hover {
+      background: #8b1e03;
+    }
+    .product-item {
+      background: #fef9f0;
+      padding: 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      border-left: 3px solid #b12704;
+    }
+    .remove-product {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: 0.2s;
+    }
+    .remove-product:hover {
+      background: #b91c1c;
+    }
+    .small-note {
+      font-size: 0.7rem;
+      color: #5c6b7a;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    /* RESPONSIVE BREAKPOINTS - ALL DEVICES */
+    @media (max-width: 900px) {
+      body {
+        padding: 12px;
+      }
+      .form-editor, .preview-area {
+        min-width: 100%;
+      }
+      .invoice-card {
+        padding: 20px;
+      }
+    }
+    @media (max-width: 640px) {
+      .inv-logo-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .logo-circle {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
+      .company-title h1 {
+        font-size: 18px;
+      }
+      .info-grid {
+        flex-direction: column;
+        gap: 6px;
+      }
+      .totals-right-block {
+        min-width: 100%;
+      }
+      .flex-totals {
+        flex-direction: column;
+      }
+      .inv-table th, .inv-table td {
+        font-size: 9px;
+        padding: 5px 3px;
+      }
+      .preview-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    @media (max-width: 480px) {
+      .invoice-card {
+        padding: 14px;
+      }
+      .inv-table {
+        font-size: 8px;
+      }
+      .totals-line-item {
+        font-size: 10px;
+        gap: 12px;
+      }
+    }
+
+    /* Print / PDF optimization */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .form-editor, .preview-header, .btn-download, .refresh-btn, .btn-add-product {
+        display: none;
+      }
+      .invoice-card {
+        box-shadow: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="invoice-app">
+  <!-- LEFT: Form Panel -->
+  <div class="form-editor">
+    <h3><i class="fas fa-pen-alt"></i> Invoice Details</h3>
+    <div class="form-group">
+      <label>Customer Name / M/s</label>
+      <input type="text" id="customerName" value="NIRMIT PRAVINBHAI VAGHASIYA">
+    </div>
+    <div class="form-group">
+      <label>Billing & Shipping Address</label>
+      <textarea id="billingAddress" rows="2">C-1/304, ANAND VATIKA, MAHADEV CHOWK, Mota Varachha, Surat, Surat, Gujarat, 394101</textarea>
+    </div>
+    <div class="inline-row">
+      <div class="form-group"><label>Mobile No.</label><input type="text" id="mobileNo" value="7600568568"></div>
+      <div class="form-group"><label>Party GSTIN</label><input type="text" id="partyGstin" value="24BBPVP2156B1ZH"></div>
+    </div>
+    <div class="inline-row">
+      <div class="form-group"><label>Invoice No.</label><input type="text" id="invoiceNo" value="17"></div>
+      <div class="form-group"><label>Invoice Date</label><input type="date" id="invoiceDate" value="2026-04-21"></div>
+    </div>
+    <div class="inline-row">
+      <div class="form-group"><label>Order No.</label><input type="text" id="orderNo" value="17"></div>
+      <div class="form-group"><label>Parcel / Bag</label><input type="text" id="parcelBag" value="42"></div>
+    </div>
+    <div class="inline-row">
+      <div class="form-group"><label>E-Way Bill No.</label><input type="text" id="ewayBill" value="632098896788"></div>
+      <div class="form-group"><label>Transport</label><input type="text" id="transport" value="RAJDHANI TRANSPORT"></div>
+    </div>
+    <div class="form-group">
+      <label>State & Code</label>
+      <input type="text" id="stateCode" value="Gujarat, STATE CODE : 24">
+    </div>
+    <div class="form-group">
+      <label>P & F Charges (₹)</label>
+      <input type="number" id="pfCharges" value="0.00" step="any">
+    </div>
+    
+    <hr>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <h4><i class="fas fa-boxes"></i> Products / Items</h4>
+      <button type="button" id="addProductBtn" class="btn-add-product" style="background:#b12704;"><i class="fas fa-plus"></i> Add Product</button>
+    </div>
+    <div id="productsContainer">
+      <!-- Dynamic products -->
+    </div>
+    
+    <button type="button" class="refresh-btn" id="refreshPreviewBtn"><i class="fas fa-sync-alt"></i> Update Invoice Preview</button>
+    <div class="small-note"><i class="fas fa-mobile-alt"></i> Fully responsive | Add multiple products | PDF ready | PSC Logo</div>
+  </div>
+
+  <!-- RIGHT: Preview & PDF -->
+  <div class="preview-area">
+    <div class="preview-header">
+      <h2><i class="fas fa-receipt"></i> Tax Invoice Preview</h2>
+      <button class="btn-download" id="downloadPdfBtn"><i class="fas fa-file-pdf"></i> Download PDF</button>
+    </div>
+    <div id="invoiceContainer">
+      <div class="invoice-card" id="invoicePaper">
+        <!-- Dynamic invoice loaded -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Product Management
+  let products = [
+    { desc: "HC STEEL WIRE 2.20 MM", hsn: "7217", gst: 18, qty: 2015.000, uom: "KGS", rate: 87.00 }
+  ];
+
+  // Helper: format money INR
+  function formatMoney(val, decimals = 2) {
+    if (isNaN(val)) return "0.00";
+    return Number(val).toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+
+  // Convert number to words
+  function numberToWordsINR(num) {
+    if (num === 0) return "Zero";
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    function convert(n) {
+      if (n < 20) return ones[n];
+      if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? " " + ones[n%10] : "");
+      if (n < 1000) return ones[Math.floor(n/100)] + " Hundred" + (n%100 ? " " + convert(n%100) : "");
+      if (n < 100000) return convert(Math.floor(n/1000)) + " Thousand" + (n%1000 ? " " + convert(n%1000) : "");
+      if (n < 10000000) return convert(Math.floor(n/100000)) + " Lakh" + (n%100000 ? " " + convert(n%100000) : "");
+      return convert(Math.floor(n/10000000)) + " Crore" + (n%10000000 ? " " + convert(n%10000000) : "");
+    }
+    return "INR " + convert(num);
+  }
+
+  // Render product forms in editor
+  function renderProductForms() {
+    const container = document.getElementById('productsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    products.forEach((prod, idx) => {
+      const div = document.createElement('div');
+      div.className = 'product-item';
+      div.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 8px;">Product ${idx+1}</div>
+        <div class="inline-row">
+          <div class="form-group" style="flex:2"><label>Description</label><input type="text" class="prod-desc" value="${escapeHtml(prod.desc)}"></div>
+          <div class="form-group"><label>HSN</label><input type="text" class="prod-hsn" value="${prod.hsn}"></div>
+        </div>
+        <div class="inline-row">
+          <div class="form-group"><label>GST %</label><input type="number" step="any" class="prod-gst" value="${prod.gst}"></div>
+          <div class="form-group"><label>Qty</label><input type="number" step="any" class="prod-qty" value="${prod.qty}"></div>
+          <div class="form-group"><label>UOM</label><input type="text" class="prod-uom" value="${prod.uom}"></div>
+          <div class="form-group"><label>Rate (₹)</label><input type="number" step="any" class="prod-rate" value="${prod.rate}"></div>
+        </div>
+        <button type="button" class="remove-product" data-idx="${idx}"><i class="fas fa-trash"></i> Remove</button>
+      `;
+      container.appendChild(div);
+    });
+    // attach remove events
+    document.querySelectorAll('.remove-product').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = parseInt(btn.dataset.idx);
+        if (!isNaN(idx) && products.length > 1) {
+          products.splice(idx, 1);
+          renderProductForms();
+          updatePreview();
+        } else if (products.length === 1) alert("At least one product required");
+      });
+    });
+    attachProductEvents();
+  }
+
+  function attachProductEvents() {
+    document.querySelectorAll('.product-item').forEach((item, idx) => {
+      const desc = item.querySelector('.prod-desc');
+      const hsn = item.querySelector('.prod-hsn');
+      const gst = item.querySelector('.prod-gst');
+      const qty = item.querySelector('.prod-qty');
+      const uom = item.querySelector('.prod-uom');
+      const rate = item.querySelector('.prod-rate');
+      const update = () => {
+        if (products[idx]) {
+          products[idx].desc = desc?.value || "";
+          products[idx].hsn = hsn?.value || "";
+          products[idx].gst = parseFloat(gst?.value) || 0;
+          products[idx].qty = parseFloat(qty?.value) || 0;
+          products[idx].uom = uom?.value || "";
+          products[idx].rate = parseFloat(rate?.value) || 0;
+          updatePreview();
+        }
+      };
+      if(desc) desc.addEventListener('input', update);
+      if(hsn) hsn.addEventListener('input', update);
+      if(gst) gst.addEventListener('input', update);
+      if(qty) qty.addEventListener('input', update);
+      if(uom) uom.addEventListener('input', update);
+      if(rate) rate.addEventListener('input', update);
+    });
+  }
+
+  function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+  // Generate Full Invoice HTML with PSC Logo
+  function generateInvoiceHTML() {
+    const customerName = document.getElementById('customerName').value.trim() || "NIRMIT PRAVINBHAI VAGHASIYA";
+    const address = document.getElementById('billingAddress').value.trim() || "";
+    const mobile = document.getElementById('mobileNo').value.trim() || "7600568568";
+    const partyGst = document.getElementById('partyGstin').value.trim() || "24BBPVP2156B1ZH";
+    const invoiceNo = document.getElementById('invoiceNo').value.trim() || "17";
+    let invDateRaw = document.getElementById('invoiceDate').value;
+    const invoiceDate = invDateRaw ? new Date(invDateRaw).toLocaleDateString('en-GB') : "21/04/2026";
+    const orderNo = document.getElementById('orderNo').value.trim() || "17";
+    const parcelBag = document.getElementById('parcelBag').value.trim() || "42";
+    const ewayBill = document.getElementById('ewayBill').value.trim() || "632098896788";
+    const transport = document.getElementById('transport').value.trim() || "RAJDHANI TRANSPORT";
+    const stateFull = document.getElementById('stateCode').value.trim() || "Gujarat, STATE CODE : 24";
+    let pfCharges = parseFloat(document.getElementById('pfCharges').value) || 0;
+    
+    let subtotal = 0, totalCgst = 0, totalSgst = 0;
+    const productRows = products.map((prod, idx) => {
+      const amount = prod.qty * prod.rate;
+      subtotal += amount;
+      const half = prod.gst / 2;
+      const cgst = amount * (half / 100);
+      const sgst = amount * (half / 100);
+      totalCgst += cgst;
+      totalSgst += sgst;
+      return { ...prod, amount, cgst, sgst, half };
+    });
+    
+    const taxableVal = subtotal + pfCharges;
+    const totalTax = totalCgst + totalSgst;
+    let grandBeforeRound = taxableVal + totalTax;
+    let roundOff = 0;
+    let grandTotal = grandBeforeRound;
+    const roundedTotal = Math.round(grandBeforeRound);
+    if (Math.abs(roundedTotal - grandBeforeRound) > 0.001) {
+      roundOff = +(roundedTotal - grandBeforeRound).toFixed(2);
+      grandTotal = roundedTotal;
+    } else {
+      grandTotal = grandBeforeRound;
+    }
+    
+    const netAmountWords = numberToWordsINR(Math.floor(grandTotal)) + (grandTotal % 1 > 0 ? " And " + Math.round((grandTotal % 1)*100) + " Paise" : " Only");
+    const taxWordsRaw = numberToWordsINR(Math.floor(totalTax)) + (totalTax % 1 > 0 ? " And " + Math.round((totalTax % 1)*100) + " Paise" : " Only");
+    
+    let tableRows = '';
+    productRows.forEach((prod, idx) => {
+      tableRows += `
+        <tr>
+          <td>${idx+1}</td>
+          <td>${escapeHtml(prod.desc)}</td>
+          <td>${prod.hsn}</td>
+          <td>${prod.gst}%</td>
+          <td>${prod.qty.toFixed(3)}</td>
+          <td>${prod.uom}</td>
+          <td class="text-right">${formatMoney(prod.rate)}</td>
+          <td class="text-right">${formatMoney(prod.amount)}</td>
+        </tr>
+      `;
+    });
+    
+    // avg GST display
+    const avgGstHalf = products.length ? (products[0].gst/2).toFixed(1) : "9.0";
+    
+    return `
+      <div class="invoice-paper">
+        <div class="inv-logo-header">
+          <div class="logo-area">
+            <div class="logo-circle">PSC</div>
+            <div class="company-title">
+              <h1>PARTH STEEL CORPORATION</h1>
+              <div class="tagline">STOCKIST & SUPPLIERS : S.S.SEAMLESS, ERW PIPE, SHEETS, COIL, FITTING, CARBON STEEL, ALLOYS & M.S.WIRE, S.S.WIRE</div>
+            </div>
+          </div>
+          <div class="inv-badge"><i class="fas fa-file-invoice"></i> TAX INVOICE</div>
+        </div>
+        <div class="company-address-block">
+          📍 Shed No. A-1, Harikrishna Estate, Singarwa-Kathwada Road, Kathwada, Ahmedabad-382430. Gujarat-24.<br>
+          <strong>GSTIN : 24AEDPV3999J2ZR</strong>
+        </div>
+        
+        <div class="customer-section">
+          <strong>M/s, ${escapeHtml(customerName)}</strong><br>
+          ${escapeHtml(address)}<br>
+          📞 MO: ${mobile} &nbsp;| &nbsp;📧 PARTY GSTIN: ${partyGst}
+        </div>
+        
+        <div class="info-grid">
+          <span class="info-item"><strong>Invoice No:</strong> ${invoiceNo}</span>
+          <span class="info-item"><strong>Date:</strong> ${invoiceDate}</span>
+          <span class="info-item"><strong>Order No:</strong> ${orderNo}</span>
+          <span class="info-item"><strong>Parcel/Bag:</strong> ${parcelBag}</span>
+        </div>
+        <div class="info-grid">
+          <span class="info-item"><strong>State:</strong> ${stateFull}</span>
+          <span class="info-item"><strong>E-Way Bill:</strong> ${ewayBill}</span>
+          <span class="info-item"><strong>Transport:</strong> ${transport}</span>
+        </div>
+        
+        <div class="bill-ship-row">
+          <strong>📦 Ship To:</strong> ${escapeHtml(customerName)}, ${escapeHtml(address)}, MO: ${mobile}
+        </div>
+        
+        <div class="inv-table-wrapper">
+          <table class="inv-table">
+            <thead>
+              <tr><th>Sr.</th><th>Description of Goods</th><th>HSN</th><th>GST%</th><th>QTY</th><th>UOM</th><th>Rate (₹)</th><th>Amount (₹)</th></tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+        
+        <div class="totals-panel">
+          <div class="flex-totals">
+            <div style="flex:1; font-size:12px;"><strong>Tax Amount:</strong> ₹ ${formatMoney(totalTax)}<br><span style="font-size:9px;">In Words: ${taxWordsRaw}</span></div>
+            <div class="totals-right-block">
+              <div class="totals-line-item"><span>Sub Total</span><span>₹ ${formatMoney(subtotal)}</span></div>
+              <div class="totals-line-item"><span>P & F Charges</span><span>₹ ${formatMoney(pfCharges)}</span></div>
+              <div class="totals-line-item"><span>Taxable Amount</span><span>₹ ${formatMoney(taxableVal)}</span></div>
+              <div class="totals-line-item"><span>CGST (${avgGstHalf}%)</span><span>₹ ${formatMoney(totalCgst)}</span></div>
+              <div class="totals-line-item"><span>SGST (${avgGstHalf}%)</span><span>₹ ${formatMoney(totalSgst)}</span></div>
+              <div class="totals-line-item"><span>Round-Off</span><span>₹ ${roundOff.toFixed(2)}</span></div>
+              <div class="totals-line-item" style="font-weight:800; margin-top:6px;"><span>Grand Total</span><span>₹ ${formatMoney(grandTotal)}</span></div>
+            </div>
+          </div>
+          <div style="margin-top:12px; font-weight:600; border-top:1px solid #e2e8f0; padding-top:8px;">Net Amount (In Words) : ${netAmountWords}</div>
+        </div>
+        
+        <div class="bank-terms-section">
+          <div>
+            <i class="fas fa-university"></i> <strong>Bank Details:</strong><br>
+            Bank : INDIAN OVERSEAS BANK, A/c No.: 32580200000247, IFSC : IOBA0003258, BRANCH : NIKOL, AHMEDABAD.
+          </div>
+          <div style="text-align: right;">
+            <strong>Terms:</strong> 24% interest after due date | Subject to Ahmedabad Jurisdiction
+          </div>
+        </div>
+        <div class="signature-area">
+          FOR, PARTH STEEL CORPORATION<br>
+          _________________________<br>
+          Authorised Signatory
+        </div>
+      </div>
+    `;
+  }
+
+  function updatePreview() {
+    const container = document.getElementById('invoicePaper');
+    if (container) container.innerHTML = generateInvoiceHTML();
+  }
+
+  function downloadPDF() {
+    const element = document.getElementById('invoicePaper');
+    if (!element) return;
+    const opt = {
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: `Invoice_${document.getElementById('invoiceNo').value.trim() || 'NO'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2.5, letterRendering: true, logging: false },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+  }
+
+  // Event listeners
+  document.getElementById('refreshPreviewBtn').addEventListener('click', () => updatePreview());
+  document.getElementById('downloadPdfBtn').addEventListener('click', () => { updatePreview(); setTimeout(downloadPDF, 150); });
+  document.getElementById('addProductBtn').addEventListener('click', () => {
+    products.push({ desc: "New Steel Item", hsn: "7217", gst: 18, qty: 100, uom: "KGS", rate: 75 });
+    renderProductForms();
+    updatePreview();
+  });
+  
+  const allTextFields = ['customerName', 'billingAddress', 'mobileNo', 'partyGstin', 'invoiceNo', 'invoiceDate', 'orderNo', 'parcelBag', 'ewayBill', 'transport', 'stateCode', 'pfCharges'];
+  allTextFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => updatePreview());
+  });
+  
+  renderProductForms();
+  updatePreview();
+</script>
+</body>
+</html>
