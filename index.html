@@ -458,7 +458,7 @@
     </div>
     <div class="form-group">
       <label>Billing & Shipping Address</label>
-      <textarea id="billingAddress" rows="2">C-1/304, ANAND VATIKA, MAHADEV CHOWK, Mota Varachha, Surat, Surat, Gujarat, 394101</textarea>
+      <textarea id="billingAddress" rows="2"> </textarea>
     </div>
     <div class="inline-row">
       <div class="form-group"><label>Mobile No.</label><input type="text" id="mobileNo" value="7600568568"></div>
@@ -473,8 +473,8 @@
       <div class="form-group"><label>Parcel / Bag</label><input type="text" id="parcelBag" value="42"></div>
     </div>
     <div class="inline-row">
-      <div class="form-group"><label>E-Way Bill No.</label><input type="text" id="ewayBill" value="632098896788"></div>
-      <div class="form-group"><label>Transport</label><input type="text" id="transport" value="RAJDHANI TRANSPORT"></div>
+      <div class="form-group"><label>E-Way Bill No.</label><input type="text" id="ewayBill" value="63206788"></div>
+      <div class="form-group"><label>Transport</label><input type="text" id="transport" value="TRANSPORT"></div>
     </div>
     <div class="form-group">
       <label>State & Code</label>
@@ -610,17 +610,17 @@
 
   // Generate Full Invoice HTML with PSC Logo
   function generateInvoiceHTML() {
-    const customerName = document.getElementById('customerName').value.trim() || "NIRMIT PRAVINBHAI VAGHASIYA";
+    const customerName = document.getElementById('customerName').value.trim() || "N";
     const address = document.getElementById('billingAddress').value.trim() || "";
-    const mobile = document.getElementById('mobileNo').value.trim() || "7600568568";
-    const partyGst = document.getElementById('partyGstin').value.trim() || "24BBPVP2156B1ZH";
+    const mobile = document.getElementById('mobileNo').value.trim() || "7568";
+    const partyGst = document.getElementById('partyGstin').value.trim() || "2ZH";
     const invoiceNo = document.getElementById('invoiceNo').value.trim() || "17";
     let invDateRaw = document.getElementById('invoiceDate').value;
     const invoiceDate = invDateRaw ? new Date(invDateRaw).toLocaleDateString('en-GB') : "21/04/2026";
     const orderNo = document.getElementById('orderNo').value.trim() || "17";
     const parcelBag = document.getElementById('parcelBag').value.trim() || "42";
-    const ewayBill = document.getElementById('ewayBill').value.trim() || "632098896788";
-    const transport = document.getElementById('transport').value.trim() || "RAJDHANI TRANSPORT";
+    const ewayBill = document.getElementById('ewayBill').value.trim() || "63788";
+    const transport = document.getElementById('transport').value.trim() || "RASPORT";
     const stateFull = document.getElementById('stateCode').value.trim() || "Gujarat, STATE CODE : 24";
     let pfCharges = parseFloat(document.getElementById('pfCharges').value) || 0;
     
